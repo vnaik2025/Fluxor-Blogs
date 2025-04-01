@@ -224,6 +224,22 @@ export function registerRoutes(app: Express): Server {
     }
   });
 
+  // Get a single post by ID for admin editing
+  app.get("/api/admin/posts/:id", isAdmin, async (req, res, next) => {
+    try {
+      const postId = parseInt(req.params.id);
+      const post = await storage.getPost(postId);
+      
+      if (!post) {
+        return res.status(404).json({ message: "Post not found" });
+      }
+      
+      res.json(post);
+    } catch (error) {
+      next(error);
+    }
+  });
+
   // Create a new post
   app.post("/api/admin/posts", isAdmin, async (req, res, next) => {
     try {
