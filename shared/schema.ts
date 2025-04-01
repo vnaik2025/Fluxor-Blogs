@@ -1,6 +1,7 @@
 import { pgTable, text, serial, integer, boolean, timestamp, jsonb } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
+import moment from "moment";
 
 // User model
 export const users = pgTable("users", {
@@ -32,7 +33,7 @@ export const posts = pgTable("posts", {
   featuredImage: text("featured_image"),
   authorId: integer("author_id").notNull(),
   status: text("status").notNull().default("draft"),
-  publishedAt: timestamp("published_at"),
+  publishedAt: text("published_at"),
   metaTitle: text("meta_title"),
   metaDescription: text("meta_description"),
   isCommentsEnabled: boolean("is_comments_enabled").notNull().default(true),
@@ -62,8 +63,8 @@ export const insertPostSchema = baseInsertPostSchema.extend({
   status: z.string().optional().default("draft"),
   metaTitle: z.string().optional().default(""),
   metaDescription: z.string().optional().default(""),
-  // Handle Date fields
-  publishedAt: z.date().nullable().optional(),
+  // Handle Date fields as string
+  publishedAt: z.string().nullable().optional().default(""),
 });
 
 // Similar to insertPostSchema, create a modified updatePostSchema with proper defaults
@@ -85,7 +86,7 @@ export const updatePostSchema = baseUpdatePostSchema.extend({
   status: z.string().optional().default("draft"),
   metaTitle: z.string().optional().default(""),
   metaDescription: z.string().optional().default(""),
-  publishedAt: z.date().nullable().optional(),
+  publishedAt: z.string().nullable().optional().default(""),
 });
 
 // Category model
@@ -142,16 +143,20 @@ export const comments = pgTable("comments", {
   authorEmail: text("author_email"),
   parentId: integer("parent_id"),
   status: text("status").notNull().default("pending"),
-  createdAt: timestamp("created_at").notNull().defaultNow(),
+  createdAt: text("created_at").notNull(),
 });
 
-export const insertCommentSchema = createInsertSchema(comments).pick({
+const baseInsertCommentSchema = createInsertSchema(comments).pick({
   content: true,
   postId: true,
   authorId: true,
   authorName: true,
   authorEmail: true,
   parentId: true,
+});
+
+export const insertCommentSchema = baseInsertCommentSchema.extend({
+  createdAt: z.string().default(() => moment().format('YYYY-MM-DD HH:mm:ss')),
 });
 
 // Ad units

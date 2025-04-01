@@ -10,6 +10,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Helmet } from "react-helmet";
 import { insertPostSchema } from "@shared/schema";
 import { z } from "zod";
+import moment from "moment";
 
 // Fix for the react-helmet TypeScript issue
 declare module 'react-helmet';
@@ -166,15 +167,15 @@ export default function CreatePost() {
 
     // If status is published and no publish date is set, set it to now
     if (data.status === "published" && !data.publishedAt) {
-      data.publishedAt = new Date();
+      data.publishedAt = moment().format('YYYY-MM-DD HH:mm:ss');
     }
 
     // Ensure publishedAt is handled correctly
-    // If it's a Date instance, it will be properly serialized to ISO string by the fetch API
-    // If it's null, leave it as null
+    // If it's non-empty string, use it as is
+    // If it's empty or null, leave it as empty string
     createPostMutation.mutate({
       ...data,
-      publishedAt: data.publishedAt instanceof Date ? data.publishedAt : null
+      publishedAt: data.publishedAt || ""
     });
   };
 
@@ -440,9 +441,9 @@ export default function CreatePost() {
                                     <Input
                                       type="datetime-local"
                                       {...field}
-                                      value={field.value instanceof Date ? field.value.toISOString().slice(0, 16) : ''}
+                                      value={field.value ? field.value.slice(0, 16) : ''}
                                       onChange={(e) => {
-                                        field.onChange(e.target.value ? new Date(e.target.value) : null);
+                                        field.onChange(e.target.value ? moment(e.target.value).format('YYYY-MM-DD HH:mm:ss') : '');
                                       }}
                                     />
                                   </div>

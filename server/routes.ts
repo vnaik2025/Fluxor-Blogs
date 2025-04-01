@@ -11,6 +11,7 @@ import {
 } from "@shared/schema";
 import { ZodError } from "zod";
 import { fromZodError } from "zod-validation-error";
+import moment from "moment";
 
 /**
  * Process request body to convert specially marked date fields from client
@@ -21,9 +22,9 @@ function processDateFields(obj: any): any {
     return obj;
   }
   
-  // If this is a marked date field, return a new Date
+  // If this is a marked date field, return a formatted date string
   if (obj._isDate === true && obj.value) {
-    return new Date(obj.value);
+    return moment(obj.value).format('YYYY-MM-DD HH:mm:ss');
   }
   
   // If it's an array, process each item
@@ -237,9 +238,10 @@ export function registerRoutes(app: Express): Server {
       postData.authorId = req.user!.id;
       
       // Process publishedAt date
-      // If it's an ISO string, convert it to a Date object
-      if (typeof postData.publishedAt === 'string') {
-        postData.publishedAt = new Date(postData.publishedAt);
+      // Ensure it's a properly formatted string
+      if (postData.publishedAt && typeof postData.publishedAt === 'string' && postData.publishedAt.trim() !== '') {
+        // Keep as string but ensure consistent format
+        postData.publishedAt = moment(postData.publishedAt).format('YYYY-MM-DD HH:mm:ss');
       }
       
       console.log('Processed post data:', JSON.stringify(postData, null, 2));
@@ -264,9 +266,11 @@ export function registerRoutes(app: Express): Server {
       
       const postData = updatePostSchema.parse(processedBody);
       
-      // Process publishedAt date if it's a string
-      if (typeof postData.publishedAt === 'string') {
-        postData.publishedAt = new Date(postData.publishedAt);
+      // Process publishedAt date
+      // Ensure it's a properly formatted string
+      if (postData.publishedAt && typeof postData.publishedAt === 'string' && postData.publishedAt.trim() !== '') {
+        // Keep as string but ensure consistent format
+        postData.publishedAt = moment(postData.publishedAt).format('YYYY-MM-DD HH:mm:ss');
       }
       
       const post = await storage.updatePost(postId, postData);
