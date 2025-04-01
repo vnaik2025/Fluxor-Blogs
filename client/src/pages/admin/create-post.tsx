@@ -10,6 +10,9 @@ import { useToast } from "@/hooks/use-toast";
 import { Helmet } from "react-helmet";
 import { insertPostSchema } from "@shared/schema";
 import { z } from "zod";
+
+// Fix for the react-helmet TypeScript issue
+declare module 'react-helmet';
 import { 
   Form, 
   FormControl, 
@@ -60,6 +63,11 @@ const createPostSchema = insertPostSchema.extend({
   title: z.string().min(5, "Title must be at least 5 characters"),
   slug: z.string().min(5, "Slug must be at least 5 characters")
     .regex(/^[a-z0-9-]+$/, "Slug can only contain lowercase letters, numbers, and dashes"),
+  // Ensure string fields have string defaults (not null) for form components
+  excerpt: z.string().default(""),
+  featuredImage: z.string().default(""),
+  metaTitle: z.string().default(""),
+  metaDescription: z.string().default(""),
 });
 
 type CreatePostFormValues = z.infer<typeof createPostSchema>;
@@ -106,6 +114,7 @@ export default function CreatePost() {
       metaTitle: "",
       metaDescription: "",
       isCommentsEnabled: true,
+      publishedAt: null, // Add default value for publishedAt
     },
   });
 
@@ -160,7 +169,13 @@ export default function CreatePost() {
       data.publishedAt = new Date();
     }
 
-    createPostMutation.mutate(data);
+    // Ensure publishedAt is handled correctly
+    // If it's a Date instance, it will be properly serialized to ISO string by the fetch API
+    // If it's null, leave it as null
+    createPostMutation.mutate({
+      ...data,
+      publishedAt: data.publishedAt instanceof Date ? data.publishedAt : null
+    });
   };
 
   return (

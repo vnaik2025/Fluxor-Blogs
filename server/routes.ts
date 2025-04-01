@@ -14,7 +14,7 @@ import { fromZodError } from "zod-validation-error";
 
 // Middleware to check if user is authenticated
 function isAuthenticated(req: Request, res: Response, next: Function) {
-  if (req.isAuthenticated()) {
+  if (req.isAuthenticated() && req.user) {
     return next();
   }
   res.status(401).json({ message: "Unauthorized" });
@@ -22,7 +22,7 @@ function isAuthenticated(req: Request, res: Response, next: Function) {
 
 // Middleware to check if user is admin
 function isAdmin(req: Request, res: Response, next: Function) {
-  if (req.isAuthenticated() && req.user.role === "admin") {
+  if (req.isAuthenticated() && req.user && req.user.role === "admin") {
     return next();
   }
   res.status(403).json({ message: "Forbidden" });
@@ -127,7 +127,7 @@ export function registerRoutes(app: Express): Server {
       const commentData = insertCommentSchema.parse(req.body);
       
       // If user is authenticated, use their ID
-      if (req.isAuthenticated()) {
+      if (req.isAuthenticated() && req.user) {
         commentData.authorId = req.user.id;
       }
       
@@ -196,8 +196,18 @@ export function registerRoutes(app: Express): Server {
   // Create a new post
   app.post("/api/admin/posts", isAdmin, async (req, res, next) => {
     try {
+      // Parse the incoming data with our schema which properly handles dates
       const postData = insertPostSchema.parse(req.body);
-      postData.authorId = req.user.id;
+      
+      // Set the author ID to the current user
+      // Since isAdmin middleware checks if user is authenticated, req.user is guaranteed to exist
+      postData.authorId = req.user!.id;
+      
+      // Process publishedAt date
+      // If it's an ISO string, convert it to a Date object
+      if (typeof postData.publishedAt === 'string') {
+        postData.publishedAt = new Date(postData.publishedAt);
+      }
       
       const post = await storage.createPost(postData);
       res.status(201).json(post);
@@ -214,6 +224,11 @@ export function registerRoutes(app: Express): Server {
     try {
       const postId = parseInt(req.params.id);
       const postData = updatePostSchema.parse(req.body);
+      
+      // Process publishedAt date if it's a string
+      if (typeof postData.publishedAt === 'string') {
+        postData.publishedAt = new Date(postData.publishedAt);
+      }
       
       const post = await storage.updatePost(postId, postData);
       if (!post) {

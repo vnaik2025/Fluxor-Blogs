@@ -39,7 +39,8 @@ export const posts = pgTable("posts", {
   viewCount: integer("view_count").notNull().default(0),
 });
 
-export const insertPostSchema = createInsertSchema(posts).pick({
+// Create the base schema
+const baseInsertPostSchema = createInsertSchema(posts).pick({
   title: true,
   slug: true,
   excerpt: true,
@@ -53,7 +54,20 @@ export const insertPostSchema = createInsertSchema(posts).pick({
   isCommentsEnabled: true,
 });
 
-export const updatePostSchema = createInsertSchema(posts).pick({
+// Create a modified schema where all string fields default to empty string instead of null
+// This helps avoid TypeScript errors with components expecting strings
+export const insertPostSchema = baseInsertPostSchema.extend({
+  excerpt: z.string().optional().default(""),
+  featuredImage: z.string().optional().default(""),
+  status: z.string().optional().default("draft"),
+  metaTitle: z.string().optional().default(""),
+  metaDescription: z.string().optional().default(""),
+  // Handle Date fields
+  publishedAt: z.date().nullable().optional(),
+});
+
+// Similar to insertPostSchema, create a modified updatePostSchema with proper defaults
+const baseUpdatePostSchema = createInsertSchema(posts).pick({
   title: true,
   excerpt: true,
   content: true,
@@ -63,6 +77,15 @@ export const updatePostSchema = createInsertSchema(posts).pick({
   metaTitle: true,
   metaDescription: true,
   isCommentsEnabled: true,
+});
+
+export const updatePostSchema = baseUpdatePostSchema.extend({
+  excerpt: z.string().optional().default(""),
+  featuredImage: z.string().optional().default(""),
+  status: z.string().optional().default("draft"),
+  metaTitle: z.string().optional().default(""),
+  metaDescription: z.string().optional().default(""),
+  publishedAt: z.date().nullable().optional(),
 });
 
 // Category model
