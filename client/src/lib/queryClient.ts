@@ -31,11 +31,23 @@ export async function apiRequest(
     const fullUrl = `${baseUrl}${urlPath}`;
     
     console.log(`API request (${method} ${fullUrl})`);
+
+    // Use a custom replacer function for JSON.stringify to add "_isDate" flag to Date objects
+    // This helps the server identify which fields should be converted back to Date objects
+    const replacer = (key: string, value: any) => {
+      if (value instanceof Date) {
+        return {
+          _isDate: true,
+          value: value.toISOString()
+        };
+      }
+      return value;
+    };
     
     const res = await fetch(fullUrl, {
       method,
       headers: data ? { "Content-Type": "application/json" } : {},
-      body: data ? JSON.stringify(data) : undefined,
+      body: data ? JSON.stringify(data, replacer) : undefined,
       credentials: "include",
     });
 

@@ -12,6 +12,36 @@ import {
 import { ZodError } from "zod";
 import { fromZodError } from "zod-validation-error";
 
+/**
+ * Process request body to convert specially marked date fields from client
+ * This handles date objects that were serialized with the _isDate flag
+ */
+function processDateFields(obj: any): any {
+  if (!obj || typeof obj !== 'object') {
+    return obj;
+  }
+  
+  // If this is a marked date field, return a new Date
+  if (obj._isDate === true && obj.value) {
+    return new Date(obj.value);
+  }
+  
+  // If it's an array, process each item
+  if (Array.isArray(obj)) {
+    return obj.map(item => processDateFields(item));
+  }
+  
+  // If it's an object, process each property
+  const result: any = {};
+  for (const key in obj) {
+    if (Object.prototype.hasOwnProperty.call(obj, key)) {
+      result[key] = processDateFields(obj[key]);
+    }
+  }
+  
+  return result;
+}
+
 // Middleware to check if user is authenticated
 function isAuthenticated(req: Request, res: Response, next: Function) {
   if (req.isAuthenticated() && req.user) {
@@ -196,8 +226,11 @@ export function registerRoutes(app: Express): Server {
   // Create a new post
   app.post("/api/admin/posts", isAdmin, async (req, res, next) => {
     try {
+      // Pre-process the request body to handle our special date objects
+      const processedBody = processDateFields(req.body);
+      
       // Parse the incoming data with our schema which properly handles dates
-      const postData = insertPostSchema.parse(req.body);
+      const postData = insertPostSchema.parse(processedBody);
       
       // Set the author ID to the current user
       // Since isAdmin middleware checks if user is authenticated, req.user is guaranteed to exist
@@ -208,6 +241,8 @@ export function registerRoutes(app: Express): Server {
       if (typeof postData.publishedAt === 'string') {
         postData.publishedAt = new Date(postData.publishedAt);
       }
+      
+      console.log('Processed post data:', JSON.stringify(postData, null, 2));
       
       const post = await storage.createPost(postData);
       res.status(201).json(post);
@@ -223,7 +258,11 @@ export function registerRoutes(app: Express): Server {
   app.put("/api/admin/posts/:id", isAdmin, async (req, res, next) => {
     try {
       const postId = parseInt(req.params.id);
-      const postData = updatePostSchema.parse(req.body);
+      
+      // Pre-process the request body to handle our special date objects
+      const processedBody = processDateFields(req.body);
+      
+      const postData = updatePostSchema.parse(processedBody);
       
       // Process publishedAt date if it's a string
       if (typeof postData.publishedAt === 'string') {
