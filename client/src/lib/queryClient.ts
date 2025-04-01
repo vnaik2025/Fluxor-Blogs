@@ -25,9 +25,14 @@ export async function apiRequest(
   data?: unknown | undefined,
 ): Promise<Response> {
   try {
-    // Ensure we're using a relative URL path
+    // Use absolute HTTP URLs (same as getQueryFn)
+    const baseUrl = window.location.origin;
     const urlPath = url.startsWith('/') ? url : `/${url}`;
-    const res = await fetch(urlPath, {
+    const fullUrl = `${baseUrl}${urlPath}`;
+    
+    console.log(`API request (${method} ${fullUrl})`);
+    
+    const res = await fetch(fullUrl, {
       method,
       headers: data ? { "Content-Type": "application/json" } : {},
       body: data ? JSON.stringify(data) : undefined,
@@ -49,9 +54,12 @@ export const getQueryFn: <T>(options: {
   ({ on401: unauthorizedBehavior }) =>
   async ({ queryKey }) => {
     try {
-      // Ensure we're using a relative URL path
+      // Use absolute HTTP URLs
       const urlPath = queryKey[0] as string;
-      const res = await fetch(urlPath.startsWith('/') ? urlPath : `/${urlPath}`, {
+      const baseUrl = window.location.origin;
+      const fullUrl = `${baseUrl}${urlPath.startsWith('/') ? urlPath : `/${urlPath}`}`;
+      console.log("Fetching from:", fullUrl);
+      const res = await fetch(fullUrl, {
         credentials: "include",
       });
 
