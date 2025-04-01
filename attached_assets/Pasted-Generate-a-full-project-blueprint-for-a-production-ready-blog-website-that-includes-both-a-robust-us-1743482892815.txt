@@ -1,0 +1,169 @@
+Generate a full project blueprint for a production-ready blog website that includes both a robust user-facing front end and an extensive admin management panel. The website should be fully optimized for SEO, responsive, and integrated with ad services (such as AdSense). Include detailed sections covering the following:
+
+User-Facing Pages & Components:
+
+Static & Landing Pages:
+
+Home / Landing Page featuring featured posts and trending articles.
+
+About Page with detailed blog/author information.
+
+Contact Page featuring a contact form, interactive map, and contact details.
+
+FAQ / Help Page to assist users with common questions.
+
+Blog & Content Pages:
+
+Blog Feed / Archive Page with a list of posts, pagination, and infinite scroll.
+
+Single Post Page that displays full post content, author details, and related posts.
+
+Category & Subcategory Pages for filtering posts by topics.
+
+Tag Pages for filtering posts by tags.
+
+Search Results Page with an intuitive search bar, filters, and suggestions.
+
+User Account Pages:
+
+Login / Sign In Page.
+
+Registration / Sign Up Page.
+
+Forgot Password / Password Recovery Page.
+
+User Profile / Dashboard showing user posts, bookmarks, and settings.
+
+Edit Profile / Account Settings Page for updating personal information.
+
+Interactive & Utility Components:
+
+Navigation Bar with menus, logo, a responsive hamburger menu, and search input.
+
+Footer with links, copyright, and social media icons.
+
+Sidebar Widgets featuring recent posts, popular posts, ads, and a newsletter signup.
+
+Pop-ups / Modals including:
+
+Login/Registration modal for quick access.
+
+Newsletter / Subscription modal.
+
+Lightbox / Image preview modal.
+
+Alert / Confirmation dialogs (e.g., for post deletion).
+
+Comment reply modal for threaded discussions.
+
+Comment Section with:
+
+A comment list with nested replies.
+
+A comment submission form equipped with CAPTCHA and rich text options.
+
+Social Sharing Widgets to facilitate content sharing.
+
+Ad Units integrated with AdSense or other networks.
+
+Dynamic elements like live notifications and real-time updates.
+
+Editors (if user-generated content is allowed):
+
+Rich Text / WYSIWYG Editor for composing posts.
+
+Markdown Editor as an alternative writing interface.
+
+Media Uploader for drag-and-drop images and videos.
+
+Inline Editing Tools for quick formatting and link insertion.
+
+SEO & Performance Components:
+
+Meta Tag Management (title, description, canonical URLs).
+
+Schema Markup Integration for rich snippets.
+
+XML Sitemap auto-generation.
+
+Lazy Loading and Image Optimization.
+
+Fully Responsive Design with Mobile Optimization.
+
+Admin & Management Pages & Components:
+
+Dashboard & Overview:
+
+Admin Dashboard providing site analytics, recent activities, and quick stats.
+
+Real-Time Notifications for new comments, posts, and user sign-ups.
+
+Content Management:
+
+Posts Management module featuring:
+
+A list of posts with filtering, search, and bulk actions.
+
+Create / Add New Post Page with a rich text editor, media uploader, and preview.
+
+Edit / Update Post Page with version control and autosave.
+
+Post Scheduling and Drafts Management.
+
+Categories & Tags Management module with tools to add, edit, or delete categories, subcategories, and tags.
+
+Media Library for managing image, video, and document uploads, including file organization and bulk actions.
+
+User & Role Management:
+
+User List page to view, search, and filter users.
+
+User Detail / Profile Editing with options to modify roles, permissions, and track activity.
+
+Role & Permissions Management supporting roles such as admin, editor, contributor, and subscriber.
+
+User Registration Approvals if required.
+
+Comments & Interactions:
+
+Comment Moderation Dashboard to approve, flag, delete, or reply to comments.
+
+Spam / Abuse Filtering Tools to maintain a clean comment section.
+
+SEO & Marketing Tools:
+
+SEO Settings Panel for managing meta tags, redirects, and canonical URLs.
+
+Sitemap Generation with submission options for search engines.
+
+Ad Management including:
+
+Ad Placement Configuration.
+
+Ad Scheduling and Rotation Settings.
+
+Newsletter & Email Marketing Module to manage subscriber lists and set up email campaigns.
+
+System & Settings:
+
+Site Settings Page for overall configurations and theme settings.
+
+Security Settings including Captcha/Anti-Spam, CSRF Protection, and Backup & Recovery options.
+
+Performance & Cache Settings with CDN integration and caching rules.
+
+API & Integration Settings for third-party APIs and social login integrations.
+
+Audit Logs & Activity Reports for tracking system changes.
+
+Additional Functional Modules:
+
+Plugin/Extension Management if applicable.
+
+Analytics Integration with a dashboard view for Google Analytics or similar tools.
+
+Notification System for admin alerts about site events.
+
+Bulk Action Tools for posts, comments, and user management.
+
+Import/Export Data Tools for migration or backup purposes.
