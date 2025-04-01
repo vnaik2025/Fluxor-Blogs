@@ -44,12 +44,15 @@ type RegisterFormValues = z.infer<typeof registerSchema>;
 
 export default function AuthPage() {
   const [location, navigate] = useLocation();
-  const { user, loginMutation, registerMutation } = useAuth();
+  const { user, loginMutation, registerMutation, registerAdminMutation } = useAuth();
   
   // Get the active tab from URL
   const params = new URLSearchParams(location.split("?")[1]);
   const tabParam = params.get("tab");
-  const [activeTab, setActiveTab] = useState(tabParam === "register" ? "register" : "login");
+  const [activeTab, setActiveTab] = useState(
+    tabParam === "register" ? "register" : 
+    tabParam === "admin" ? "admin" : "login"
+  );
 
   // Login form
   const loginForm = useForm<LoginFormValues>({
@@ -82,7 +85,10 @@ export default function AuthPage() {
   // Handle tab change
   const handleTabChange = (value: string) => {
     setActiveTab(value);
-    navigate(`/auth${value === "register" ? "?tab=register" : ""}`);
+    let query = "";
+    if (value === "register") query = "?tab=register";
+    if (value === "admin") query = "?tab=admin";
+    navigate(`/auth${query}`);
   };
 
   // Login form submission
@@ -93,11 +99,18 @@ export default function AuthPage() {
     });
   };
 
-  // Register form submission
+  // Regular user registration form submission
   const onRegisterSubmit = (data: RegisterFormValues) => {
     // Remove confirmPassword as it's not part of the API schema
     const { confirmPassword, ...registerData } = data;
     registerMutation.mutate(registerData);
+  };
+  
+  // Admin registration form submission
+  const onAdminRegisterSubmit = (data: RegisterFormValues) => {
+    // Remove confirmPassword as it's not part of the API schema
+    const { confirmPassword, ...registerData } = data;
+    registerAdminMutation.mutate(registerData);
   };
 
   if (user) {
@@ -124,9 +137,10 @@ export default function AuthPage() {
                 </h1>
                 
                 <Tabs value={activeTab} onValueChange={handleTabChange}>
-                  <TabsList className="grid w-full grid-cols-2 mb-8">
+                  <TabsList className="grid w-full grid-cols-3 mb-8">
                     <TabsTrigger value="login">Sign In</TabsTrigger>
                     <TabsTrigger value="register">Register</TabsTrigger>
+                    <TabsTrigger value="admin">Admin</TabsTrigger>
                   </TabsList>
                   
                   <TabsContent value="login">
@@ -278,6 +292,118 @@ export default function AuthPage() {
                           onClick={() => handleTabChange("login")}
                         >
                           Sign In
+                        </button>
+                      </p>
+                    </div>
+                  </TabsContent>
+                  
+                  <TabsContent value="admin">
+                    <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-6">
+                      <div className="flex">
+                        <div className="flex-shrink-0">
+                          <svg className="h-5 w-5 text-yellow-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                            <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                          </svg>
+                        </div>
+                        <div className="ml-3">
+                          <p className="text-sm text-yellow-700">
+                            Admin registration is only for site administrators. Regular users should register using the standard registration form.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <Form {...registerForm}>
+                      <form onSubmit={registerForm.handleSubmit(onAdminRegisterSubmit)} className="space-y-6">
+                        <FormField
+                          control={registerForm.control}
+                          name="username"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Admin Username</FormLabel>
+                              <FormControl>
+                                <Input placeholder="Choose a username" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        
+                        <FormField
+                          control={registerForm.control}
+                          name="email"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Email</FormLabel>
+                              <FormControl>
+                                <Input placeholder="Enter your email" type="email" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        
+                        <FormField
+                          control={registerForm.control}
+                          name="name"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Full Name</FormLabel>
+                              <FormControl>
+                                <Input placeholder="Enter your full name" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        
+                        <FormField
+                          control={registerForm.control}
+                          name="password"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Password</FormLabel>
+                              <FormControl>
+                                <Input placeholder="Create a password" type="password" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        
+                        <FormField
+                          control={registerForm.control}
+                          name="confirmPassword"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Confirm Password</FormLabel>
+                              <FormControl>
+                                <Input placeholder="Confirm your password" type="password" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        
+                        <Button 
+                          type="submit" 
+                          className="w-full"
+                          disabled={registerAdminMutation.isPending}
+                        >
+                          {registerAdminMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                          Create Admin Account
+                        </Button>
+                      </form>
+                    </Form>
+                    
+                    <div className="mt-6 text-center">
+                      <p className="text-sm text-neutral-600">
+                        Need a regular account instead?{" "}
+                        <button 
+                          className="text-primary hover:underline font-medium"
+                          onClick={() => handleTabChange("register")}
+                        >
+                          Register as User
                         </button>
                       </p>
                     </div>

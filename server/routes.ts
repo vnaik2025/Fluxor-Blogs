@@ -353,6 +353,30 @@ export function registerRoutes(app: Express): Server {
     }
   });
 
+  // Create a special endpoint to promote a user to admin (for first-time setup)
+  app.post("/api/promote-to-admin", async (req, res, next) => {
+    try {
+      const { username, secretKey } = req.body;
+      
+      // This is a sensitive operation, so we add a secret key check
+      // In a production app, you'd want to use an environment variable
+      if (secretKey !== "BloggerAdminSetup") {
+        return res.status(403).json({ message: "Invalid secret key" });
+      }
+      
+      const user = await storage.getUserByUsername(username);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      // Update user role to admin
+      const updatedUser = await storage.updateUser(user.id, { role: "admin" });
+      res.json(updatedUser);
+    } catch (error) {
+      next(error);
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

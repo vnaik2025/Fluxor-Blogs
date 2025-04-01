@@ -74,7 +74,7 @@ export function setupAuth(app: Express) {
     }
   });
 
-  // Registration endpoint
+  // Regular User Registration endpoint
   app.post("/api/register", async (req, res, next) => {
     try {
       // Validate input
@@ -96,6 +96,42 @@ export function setupAuth(app: Express) {
         ...validatedData,
         password: await hashPassword(validatedData.password),
       });
+
+      // Auto login after registration
+      req.login(user, (err) => {
+        if (err) return next(err);
+        res.status(201).json(user);
+      });
+    } catch (error) {
+      if (error instanceof ZodError) {
+        return res.status(400).json({ message: fromZodError(error).message });
+      }
+      next(error);
+    }
+  });
+  
+  // Admin Registration endpoint
+  app.post("/api/register-admin", async (req, res, next) => {
+    try {
+      // Validate input
+      const validatedData = insertUserSchema.parse(req.body);
+      
+      // Check if user already exists
+      const existingUser = await storage.getUserByUsername(validatedData.username);
+      if (existingUser) {
+        return res.status(400).json({ message: "Username already exists" });
+      }
+
+      const existingEmail = await storage.getUserByEmail(validatedData.email);
+      if (existingEmail) {
+        return res.status(400).json({ message: "Email already exists" });
+      }
+
+      // Create admin user with hashed password
+      const user = await storage.createUser({
+        ...validatedData,
+        password: await hashPassword(validatedData.password),
+      }, true); // true flag creates an admin user
 
       // Auto login after registration
       req.login(user, (err) => {
